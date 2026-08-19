@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64.736 23.028" role="img">
+<title>third floor</title>
+<g stroke-linejoin="round" stroke-linecap="round">
+<polygon class="window" data-global-id="2em0eSzTL0YOJ_ze0fUnDI" points="1.625,19.777 2.945,19.777 2.945,17.957 1.625,17.957"/>
+<polygon class="door" data-global-id="2WIRMOLbHCiPvL6VKhkZTH" points="61.627,1.057 62.554,1.125 62.614,1.125 62.621,1.125 63.111,1.057 63.111,0.997 63.045,0.626 62.223,0.153 62.125,0.099 62.022,0.056 61.915,0.025 61.804,0.006 61.693,0.000 61.627,0.997"/>
+</g>
+<style>.wall{fill:#555;stroke:#222;stroke-width:.04}.opening{fill:#fff;stroke:#777;stroke-width:.025}.window{fill:#55b9d6;stroke:#135a70;stroke-width:.035}.door{fill:#d9954f;stroke:#704115;stroke-width:.035}.axis{fill:none;stroke:#c44;stroke-width:.02;stroke-dasharray:.15 .1}.space-label{fill:#222;font:0.22px sans-serif;text-anchor:middle}</style>
+</svg>

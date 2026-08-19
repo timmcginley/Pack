@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54.020 15.588" role="img">
+<title>roof auditorium</title>
+<g stroke-linejoin="round" stroke-linecap="round">
+<polygon class="wall" data-global-id="1xVXmArwXD0O7f_ywFqtIV" points="1.414,13.010 52.731,13.010 52.731,12.580 1.414,12.580"/>
+<polygon class="wall" data-global-id="1xVXmArwXD0O7f_ywFqtHn" points="52.497,12.580 52.731,12.580 52.731,0.000 52.497,0.000"/>
+<polygon class="wall" data-global-id="0cgbdy2o97$vOMQ583W3yk" points="1.289,12.860 1.414,12.860 1.539,12.580 1.539,0.000 1.289,0.000"/>
+<polygon class="window" data-global-id="3_2XTZM0j0LuC1AF0A2wRT" points="34.154,10.020 35.674,10.020 35.674,7.500 34.154,7.500"/>
+<polygon class="window" data-global-id="3_2XTZM0j0LuC1AF0A2wf6" points="21.554,10.020 23.074,10.020 23.074,7.500 21.554,7.500"/>
+<polygon class="window" data-global-id="3_2XTZM0j0LuC1AF0A2weL" points="40.754,10.820 42.274,10.820 42.274,8.300 40.754,8.300"/>
+</g>
+<style>.wall{fill:#555;stroke:#222;stroke-width:.04}.opening{fill:#fff;stroke:#777;stroke-width:.025}.window{fill:#55b9d6;stroke:#135a70;stroke-width:.035}.door{fill:#d9954f;stroke:#704115;stroke-width:.035}.axis{fill:none;stroke:#c44;stroke-width:.02;stroke-dasharray:.15 .1}.space-label{fill:#222;font:0.22px sans-serif;text-anchor:middle}</style>
+</svg>

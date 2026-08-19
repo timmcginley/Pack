@@ -13,6 +13,10 @@ import ifcopenshell.geom
 from ifcopenshell.util.element import get_decomposition
 from ifcopenshell.util.placement import get_local_placement
 from ifcopenshell.util.unit import calculate_unit_scale
+import ifcopenshell.geom
+from ifcopenshell.util.element import get_decomposition
+from ifcopenshell.util.placement import get_local_placement
+from ifcopenshell.util.unit import calculate_unit_scale
 
 IFC_CONVERT = r"C:\Program Files\IfcConvert\IfcConvert.exe"
 
@@ -141,6 +145,18 @@ def add_grid_axes(svg_path: Path, model, storey, settings) -> None:
             output_max_y - (y - world_min_y) * (output_max_y - output_min_y) / (world_max_y - world_min_y),
         )
 
+    u_axes = [axis for grid in grids for axis in (grid.UAxes or [])]
+    u_points = [point for axis in u_axes for point in grid_axis_points(axis, grids[0], unit_scale)]
+    u_anchor_world_y = max(point[1] for point in u_points)
+    u_anchor_svg_y = project((world_min_x, u_anchor_world_y))[1]
+    horizontal_scale = (output_max_x - output_min_x) / (world_max_x - world_min_x)
+
+    def project_u(point: tuple[float, float]) -> tuple[float, float]:
+        x, y = point
+        projected_x = project((x, u_anchor_world_y))[0]
+        projected_y = u_anchor_svg_y - (y - u_anchor_world_y) * horizontal_scale
+        return projected_x, projected_y
+
     group = ET.Element(f"{{{namespace}}}g", {"id": "ifc-grid-axes"})
     for grid in grids:
         for axis in list(grid.UAxes or []) + list(grid.VAxes or []):
@@ -150,14 +166,15 @@ def add_grid_axes(svg_path: Path, model, storey, settings) -> None:
                 continue
             if len(points) < 2:
                 continue
-            x1, y1 = project(points[0])
-            x2, y2 = project(points[-1])
+            project_axis = project_u if axis in (grid.UAxes or []) else project
+            x1, y1 = project_axis(points[0])
+            x2, y2 = project_axis(points[-1])
             line = ET.SubElement(group, f"{{{namespace}}}line", {
                 "x1": f"{x1:g}", "y1": f"{y1:g}", "x2": f"{x2:g}", "y2": f"{y2:g}",
                 "stroke": "#b00000", "stroke-width": "0.08", "stroke-dasharray": "0.3 0.2",
                 "data-global-id": str(axis.AxisCurve.id()),
             })
-            label_x, label_y = project(points[len(points) // 2])
+            label_x, label_y = project_axis(points[len(points) // 2])
             label = ET.SubElement(group, f"{{{namespace}}}text", {
                 "x": f"{label_x:g}", "y": f"{label_y:g}", "fill": "#b00000",
                 "font-size": "0.8", "text-anchor": "middle",

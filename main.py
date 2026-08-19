@@ -20,13 +20,25 @@ from ifcopenshell.util.unit import calculate_unit_scale
 
 IFC_CONVERT = r"C:\Program Files\IfcConvert\IfcConvert.exe"
 
-IFC_FILE = Path(
-    r"C:\Users\timmc\OneDrive - Danmarks Tekniske Universitet\Skrivebord\3626D-A\BIM\01\26-01-D-ARCH.ifc"
+NUM = "01"
+YR = "26"
+PART = "D"
+SUB = "MEP"
+
+IFC_FILE = (
+    Path(r"C:\Users\timmc\OneDrive - Danmarks Tekniske Universitet\Skrivebord")
+    / f"36{YR}{PART}-A"
+    / "BIM"
+    / NUM
+    / f"{YR}-{NUM}-{PART}-{SUB}.ifc"
 )
-OUTPUT_DIR = Path("floorplans")
+
+print(IFC_FILE)
+
+OUTPUT_DIR = Path(f"{NUM}/{SUB}")
 THREADS = 7
 SCALE = "1:100"
-STOREY_TO_EXPORT = "basement"  # Set to None to export every storey.
+STOREY_TO_EXPORT = None  # Set to None to export every storey. else 'basement'.
 SVG_UNIT_MM = 10
 BORDER_INSET_MM = 10
 BORDER_STROKE_MM = 0.25
@@ -279,7 +291,7 @@ def export_floor_plans(
             "--plan",
             "--model",
             "--print-space-names",
-            "--print-space-areas",
+            #"--print-space-areas",
             "--door-arcs",
             "--scale",
             SCALE,

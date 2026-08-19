@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import xml.etree.ElementTree as ET
+import re
 from pathlib import Path
 
 import ifcopenshell
@@ -17,6 +19,9 @@ IFC_FILE = Path(
 OUTPUT_DIR = Path("floorplans")
 THREADS = 7
 SCALE = "1:100"
+SVG_UNIT_MM = 10
+BORDER_INSET_MM = 10
+BORDER_STROKE_MM = 0.25
 
 
 def safe_filename(name: str | None, fallback: str) -> str:
@@ -36,6 +41,74 @@ def find_ifc_convert(path: str | None) -> str:
         "IfcConvert was not found. Install the IfcOpenShell command-line tools "
         "or pass its location with --ifc-convert."
     )
+
+
+def add_inset_border(svg_path: Path, inset_mm: float = BORDER_INSET_MM) -> None:
+    """Add a 1 cm inset black border to an SVG document."""
+    namespace = "http://www.w3.org/2000/svg"
+    inset_units = inset_mm / SVG_UNIT_MM
+    stroke_units = BORDER_STROKE_MM / SVG_UNIT_MM
+    ET.register_namespace("", namespace)
+    tree = ET.parse(svg_path)
+    root = tree.getroot()
+    view_box = root.get("viewBox")
+    border_x = border_y = 0.0
+    border_width = border_height = 0.0
+    if view_box:
+        values = view_box.replace(",", " ").split()
+        if len(values) != 4:
+            raise ValueError(f"SVG viewBox must have four values: {svg_path}")
+        min_x, min_y, width, height = map(float, values)
+        border_x, border_y = min_x + inset_units, min_y + inset_units
+        border_width, border_height = width - inset_units * 2, height - inset_units * 2
+    else:
+        number = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
+        coordinates: list[float] = []
+        geometry_tags = {"path", "polyline", "polygon", "line", "rect", "circle", "ellipse", "text"}
+
+        def collect(element: ET.Element, inside_defs: bool = False) -> None:
+            local_name = element.tag.rsplit("}", 1)[-1]
+            inside_defs = inside_defs or local_name == "defs"
+            if not inside_defs and local_name in geometry_tags:
+                for attribute in ("d", "points", "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "rx", "ry"):
+                    coordinates.extend(float(value) for value in re.findall(number, element.get(attribute, "")))
+            for child in element:
+                collect(child, inside_defs)
+
+        collect(root)
+        if len(coordinates) < 2:
+            raise ValueError(f"SVG has no drawable geometry: {svg_path}")
+        min_x, max_x = min(coordinates[0::2]), max(coordinates[0::2])
+        min_y, max_y = min(coordinates[1::2]), max(coordinates[1::2])
+        width, height = max_x - min_x, max_y - min_y
+        root.set("viewBox", f"{min_x - inset_units:g} {min_y - inset_units:g} {width + inset_units * 2:g} {height + inset_units * 2:g}")
+        root.set("width", f"{(width + inset_units * 2) * SVG_UNIT_MM:g}mm")
+        root.set("height", f"{(height + inset_units * 2) * SVG_UNIT_MM:g}mm")
+        border_x, border_y = min_x, min_y
+        border_width, border_height = width, height
+    if width <= inset_units * 2 or height <= inset_units * 2:
+        raise ValueError(f"SVG is too small for a {inset_mm:g} mm inset: {svg_path}")
+
+    border_tag = f"{{{namespace}}}rect"
+    for element in root.findall(border_tag):
+        if element.get("id") == "inset-border":
+            root.remove(element)
+
+    border = ET.Element(
+        border_tag,
+        {
+            "id": "inset-border",
+            "x": str(border_x),
+            "y": str(border_y),
+            "width": str(border_width),
+            "height": str(border_height),
+            "fill": "none",
+            "stroke": "black",
+            "stroke-width": str(stroke_units),
+        },
+    )
+    root.append(border)
+    tree.write(svg_path, encoding="utf-8", xml_declaration=True)
 
 
 def export_floor_plans(
@@ -59,6 +132,7 @@ def export_floor_plans(
             "--plan",
             "--model",
             "--print-space-names",
+            "--print-space-areas",
             "--door-arcs",
             "--scale",
             SCALE,
@@ -75,6 +149,7 @@ def export_floor_plans(
         ]
         try:
             subprocess.run(command, check=True)
+            add_inset_border(output_path)
         except subprocess.CalledProcessError:
             if output_path.exists():
                 output_path.unlink()

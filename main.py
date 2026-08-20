@@ -23,7 +23,7 @@ IFC_CONVERT = r"C:\Program Files\IfcConvert\IfcConvert.exe"
 NUM = "01"
 YR = "26"
 PART = "D"
-SUB = "MEP"
+SUB = "ARCH"
 
 IFC_FILE = (
     Path(r"C:\Users\timmc\OneDrive - Danmarks Tekniske Universitet\Skrivebord")
